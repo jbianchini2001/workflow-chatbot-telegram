@@ -51,10 +51,14 @@ docker compose up -d
 Após os containers iniciarem com sucesso, siga os passos abaixo para ativar o bot:
 
 1. Acesse a interface do N8N no seu navegador através do endereço: `http://localhost:5678` ou via seu webhook Ngrok configurado na variável de ambiente `WEBHOOK_URL`.
-2. No menu lateral, clique em **Workflows** e depois em **Add Workflow**.
-3. No canto superior direito, clique no menu de três pontos (`...`) e selecione **Import from File**. Escolha o arquivo `workflow-telegram-chatbot.json`.
-4. Caso as credenciais não sejam preenchidas automaticamente pelas variáveis de ambiente, abra os nós do **Telegram**, **Google Gemini** e **OpenWeather** e adicione as suas credenciais.
-5. **Ative o fluxo:** No canto superior direito da tela do workflow, altere a chave de inativo para **Active**. A partir deste momento, o N8N registrará o Webhook de produção no Telegram e o seu bot estará pronto para uso contínuo em segundo plano através do `n8n-worker`.
+2. Crie sua conta de administrador do N8N.
+3. No menu lateral direito, clique em **+** e depois em **Workflow**.
+4. No canto superior direito, clique no menu de três pontos (`...`) e selecione **Import from File**. Escolha o arquivo `workflow-telegram-chatbot.json`.
+5. Caso as credenciais não sejam preenchidas automaticamente pelas variáveis de ambiente, abra os nós do **Telegram**, **Google Gemini** e **OpenWeather** e adicione as suas credenciais.
+5.1. No menu lateral direito, clique em **+** e depois em **Credential**.
+5.2. Procure pela credencial do Google Gemini (PaLM) API e clique em **Create**.
+5.2.1. No campo **API Key** preencha: TODO
+6. **Ative o fluxo:** No canto superior direito da tela do workflow, clique em **Publish**. A partir deste momento, o N8N registrará o Webhook de produção no Telegram e o seu bot estará pronto para uso contínuo em segundo plano através do `n8n-worker`. Nota: os locais dos menus, os botões e os nomes das opções podem variar de acordo com a versão do N8N que está sendo utilizada.
 
 ---
 
