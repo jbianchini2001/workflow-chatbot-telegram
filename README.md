@@ -25,7 +25,7 @@ Para executar este projeto na sua máquina, você precisará ter instalado e con
 * **Google Gemini API Key**: Obtida no Google AI Studio (opcional, mas recomendado).
 * **OpenWeather API Key**: Obtida criando uma conta no site OpenWeatherMap.
 * **Ngrok Auth Token**: Obtido criando uma conta no Ngrok (necessário para o webhook do Telegram se comunicar com sua máquina local).
-* **Observação: no anexo logo abaixo você pode consultar o passo-a-passo de como criar os Tokens e API keys necessários.
+* **NOTA**: No final deste documento há uma seção que pode consultar o passo-a-passo de como criar os Tokens e API keys necessários.
 
 ### 2.2. Como configurar e executar o projeto
 
@@ -41,9 +41,11 @@ Para executar este projeto na sua máquina, você precisará ter instalado e con
 docker compose up -d
 
 ```
+6. Quando quiser desligar a infraestrutura de servidores, no terminal, dentro da pasta do projeto, execute o comando para desligá-la:
+```bash
+docker compose down
 
-
-
+```
 ---
 
 ## 3. Como iniciar o fluxo do N8N em Modo Produção
@@ -55,10 +57,18 @@ Após os containers iniciarem com sucesso, siga os passos abaixo para ativar o b
 3. No menu lateral direito, clique em **+** e depois em **Workflow**.
 4. No canto superior direito, clique no menu de três pontos (`...`) e selecione **Import from File**. Escolha o arquivo `workflow-telegram-chatbot.json`.
 5. Caso as credenciais não sejam preenchidas automaticamente pelas variáveis de ambiente, abra os nós do **Telegram**, **Google Gemini** e **OpenWeather** e adicione as suas credenciais.
-5.1. No menu lateral direito, clique em **+** e depois em **Credential**.
-5.2. Procure pela credencial do Google Gemini (PaLM) API e clique em **Create**.
-5.2.1. No campo **API Key** preencha: TODO
-6. **Ative o fluxo:** No canto superior direito da tela do workflow, clique em **Publish**. A partir deste momento, o N8N registrará o Webhook de produção no Telegram e o seu bot estará pronto para uso contínuo em segundo plano através do `n8n-worker`. Nota: os locais dos menus, os botões e os nomes das opções podem variar de acordo com a versão do N8N que está sendo utilizada.
+    1. No menu lateral direito, clique em **+** e depois em **Credential**.
+    2. Procure pela credencial do **Google Gemini (PaLM) API** e clique em **Create**.
+    3. No campo **API Key**, escolha a opção **Expression**, preencha o valor com `{{ $env["DEFAULT_GEMINI_API_KEY"] }}` e salve.
+    4. Adicione a credencial **Telegram API** e no campo **Access Token**, escolha a opção **Expression**, preencha o valor com `{{ $env["TELEGRAM_BOT_TOKEN"] }}` e salve.
+    5. Adicione a credencial **OpenWeatherMap API** e no campo **Access Token**, escolha a opção **Expression**, preencha o valor com `{{ $env["OPENWEATHER_API_KEY"] }}` e salve.
+    6. O procedimento abaixo precisará ser feito caso apareça o ícone ⚠️ nos nós do Telegram e do Gemini.
+        2. Dê um duplo clique no nó que está com o ícone ⚠️.
+        3. Na janela de configurações do nó, procure pelo campo "Credential to connect with". Ele provavelmente estará em branco ou com um aviso em vermelho. 
+        4. Clique na caixa de seleção (dropdown) e selecione a credencial correspondente que foi criada anterioremnte.
+        5. Feche a janela do nó. O ícone ⚠️ deverá desaparecer.
+6. **Ative o fluxo:** No canto superior direito da tela do workflow, clique em **Publish**.
+7. **Nota**: os locais dos menus, os botões e os nomes das opções podem variar de acordo com a versão do N8N que está sendo utilizada.
 
 ---
 
@@ -96,11 +106,11 @@ No entanto, neste modo **a entrada de dados é rigorosa**. O usuário deve envia
 
 ---
 
-## Anexo: Guia de criação de contas e chaves de API (Tokens)
+## Guia de criação de contas e chaves de API (Tokens)
 
 Este anexo fornece o passo a passo para criar as contas e gerar as credenciais necessárias para que o projeto funcione corretamente na sua máquina.
 
-### A) Criando o bot no Telegram e obtendo o Token
+### A. Criando o bot no Telegram e obtendo o Token
 1. Abra o aplicativo do Telegram (no celular ou computador) e pesquise por **@BotFather** na barra de busca.
 2. Inicie uma conversa com ele clicando em **Start** (ou enviando o comando `/start`).
 3. Envie o comando `/newbot` para criar um novo robô.
@@ -109,7 +119,7 @@ Este anexo fornece o passo a passo para criar as contas e gerar as credenciais n
 6. Após a confirmação, o BotFather enviará uma mensagem de sucesso contendo o seu **Token de Acesso HTTP API** (uma sequência longa de letras e números). 
 7. Copie esse token e cole-o no seu arquivo `.env` na variável `TELEGRAM_BOT_TOKEN`.
 
-### B) Criando conta na OpenWeather e obtendo a API Key
+### B. Criando conta na OpenWeather e obtendo a API Key
 1. Acesse o site oficial da OpenWeather: [openweathermap.org](https://openweathermap.org/)
 2. Clique em **Create an Account** no menu superior e preencha seus dados para criar uma conta gratuita.
 3. Após fazer o login, clique no seu nome de usuário no canto superior direito e selecione **My API Keys**.
@@ -117,14 +127,14 @@ Este anexo fornece o passo a passo para criar as contas e gerar as credenciais n
 5. Copie a chave (uma sequência de letras e números) e cole-a no seu arquivo `.env` na variável `OPENWEATHER_API_KEY`.
 *(Atenção: A chave da OpenWeather pode levar de 1 a 2 horas para ser totalmente ativada pelos servidores deles após a criação da conta recém-feita. Se o bot der erro logo nos primeiros testes, aguarde esse prazo).*
 
-### C) Criando conta no Ngrok e obtendo o Authtoken
+### C. Criando conta no Ngrok e obtendo o Authtoken
 1. Acesse o site do Ngrok: [ngrok.com](https://ngrok.com/) e clique em **Sign up** para criar sua conta gratuita.
 2. Após finalizar o cadastro e fazer o login, você será direcionado para o painel de controle (Dashboard).
 3. No menu lateral esquerdo, navegue até **Tunnels** e clique em **Authtokens** (ou localize a opção "Your Authtoken" logo na página inicial).
 4. Você verá o seu token de autenticação (uma string longa). Clique no botão de copiar.
 5. Cole este valor no seu arquivo `.env` na variável `NGROK_AUTHTOKEN`.
 
-### D) Criando conta no Google AI Studio e obtendo a API Key (Gemini)
+### D. Criando conta no Google AI Studio e obtendo a API Key (Gemini)
 1. Acesse o Google AI Studio: [aistudio.google.com](https://aistudio.google.com/) e faça login com a sua conta do Google comum.
 2. No menu lateral esquerdo, clique no botão **Get API key** (Obter chave de API).
 3. Na tela principal, clique no botão azul **Create API key**.
