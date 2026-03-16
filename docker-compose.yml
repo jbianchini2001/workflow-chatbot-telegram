@@ -1,0 +1,142 @@
+services:
+  n8n-editor:
+    image: n8nio/n8n:2.9.4
+    container_name: n8n-editor-ftr
+    ports:
+      - 5678:5678
+    volumes:
+      - n8n-data:/home/node/.n8n
+    environment:
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
+      - EXECUTIONS_TIMEOUT_MAX=60
+      #- N8N_LOG_LEVEL=debug
+      
+      ## Postgres
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=postgres
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      ## Queue Mode
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+
+      ## Credenciais Telegram
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+
+      ## Credenciais Gemini
+      - DEFAULT_GEMINI_API_KEY=${DEFAULT_GEMINI_API_KEY}
+      
+      ## Credenciais OpenWeather
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+
+      ## Webhook
+      - WEBHOOK_URL=${WEBHOOK_URL}
+    networks:
+      - n8n-ftr
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  n8n-worker:
+    image: n8nio/n8n:2.9.4
+    command: worker
+    ports:
+      - 5679:5678
+    volumes:
+      - n8n-data:/home/node/.n8n
+    environment:
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
+      - EXECUTIONS_TIMEOUT_MAX=60
+      #- N8N_LOG_LEVEL=debug
+
+      ## Postgres
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=postgres
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      ## Queue Mode
+      - EXECUTIONS_MODE=queue
+      - QUEUE_BULL_REDIS_HOST=redis
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+
+      ## Credenciais Telegram
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+
+      ## Credenciais Gemini
+      - DEFAULT_GEMINI_API_KEY=${DEFAULT_GEMINI_API_KEY}
+      
+      ## Credenciais OpenWeather
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+
+      ## Webhook
+      - WEBHOOK_URL=${WEBHOOK_URL}
+
+    networks:
+      - n8n-ftr
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  postgres:
+    image: ankane/pgvector
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+    networks:
+      - n8n-ftr
+    restart: always
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - n8n-ftr
+    restart: always
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    ports:
+      - 4040:4040
+    volumes:
+      - ngrok-data:/etc
+    command: http --url=${WEBHOOK_URL} n8n-editor-ftr:5678 
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    restart: always
+    networks:
+      - n8n-ftr
+    depends_on:
+      - n8n-editor
+
+networks:
+  n8n-ftr:
+    driver: bridge
+
+volumes:
+  n8n-data:
+  postgres-data:
+  redis-data:
+  ngrok-data:

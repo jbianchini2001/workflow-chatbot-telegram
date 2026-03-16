@@ -1,0 +1,692 @@
+{
+  "name": "workflow-telegram-chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Aqui está a mensagem recebida do usuário no Telegram: \n\"{{ $json.message.text }}\"\n\nSiga suas instruções de sistema para realizar as seguintes tarefas com base nesta mensagem:\n\n1. Identifique o nome da cidade e do estado do Brasil\n2. Remova espaços extras e normalize a acentuação e as letras minúsculas.\n3. Pesquise qual é a latitude e longitude da da cidade e estado informados.\n4. Acione a ferramenta conectada (buscar_clima) para consultar o clima atual desta localidade. Os parâmetros a serem enviados a ferramenta são: \"latitude\" e \"longitude\".\n5. Extraia a temperatura do resultado.\n6. Arredonde o valor da temperatura.\n7. Se a cidade for encontrada com sucesso, retorne estritamente a mensagem no formato: \"🌤️A temperatura em {Cidade} é de {Temperatura}°C.\".\n8. Se houver erro ou a cidade não for encontrada, retorne a mensagem: \"❌ Cidade não encontrada. Use o formato Cidade, UF (ex.: São Paulo, SP).\".\n9. Se a ferramenta retornar qualquer outro erro técnico (ex: 401 Unauthorized, 429 Too Many Requests, 500 Server Error, 400 Nothing to geocode ou falha de conexão), retorne estritamente a mensagem no formato: \"❌ Desculpe, não consegui consultar o clima agora devido a um problema técnico no servidor meteorológico.\"\n10. As mensagens devem estar em Português do Brasil (PT-BR) e no formato JSON estruturado desta forma: \n10.1 {\"message\": \"{mensagem}\", \"ok\": true}, se mensagem de sucesso.\n10.2 {\"message\": \"{nensagem}\", \"ok\": false}, se mensagem de erro.",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=Você é um assistente virtual amigável projetado para operar no Telegram, focado exclusivamente em fornecer a temperatura atual de qualquer cidade do Brasil.\n\nSiga estas regras rigorosamente a cada interação:\n\n1. VALIDAÇÃO E FORMATAÇÃO DE ENTRADA:\n1.1 Receba o nome da cidade e estado do Brasil enviado pelo usuário. O formato de entrada será Cidade, Estado. Por exemplo: Curitiba, PR; São Paulo, SP.\n1.2 Antes de utilizar a ferramenta de clima, remova espaços extras, normalize a acentuação e converta as letras para minúsculas.\n1.3 A partir da cidade e estado identificados, encontre a latitude e longitude. Apenas pesquise pela cidade e estado informados. É mandatório que a cidade exista no estado informado. Outros tipos de localidades como por exemplo, bairros são inválidos. Neste caso a mensagem de erro deve ser informada ao usuário exatamente assim: \"❌ Cidade não encontrada. Use o formato Cidade, UF (ex.: São Paulo, SP).\". A mensagem devem estar em Português do Brasil (PT-BR) e no formato JSON estruturado desta forma: {\"message\": \"{mensagem}\", \"ok\": false}.\n\n2. USO DA FERRAMENTA OPENWEATHER:\n2.1 Utilize a ferramenta conectada (buscar_clima) para buscar o clima.  Os parâmetros a serem enviados a ferramenta são: \"latitude\" e \"longitude\".\n\n3. RESPOSTA DE SUCESSO:\n3.1 Extraia a temperatura da resposta da API.\n3.2 Arredonde a temperatura para o número inteiro mais próximo.\n3.3 Formate a string final estritamente neste modelo: \"🌤️ A temperatura em [Nome da Cidade Formatado] é de [Temperatura]°C.\"\n3.4 A mensagem devem estar em Português do Brasil (PT-BR) e no formato JSON estruturado desta forma: {\"message\": \"{mensagem}\", \"ok\": true}.\n\n4. RESPOSTA DE ERRO - CIDADE NÃO ENCONTRADA (404):\n4.1 Se a ferramenta retornar erro de cidade não encontrada (ex: 404), você deve informar o usuário exatamente assim: \"❌ Cidade não encontrada. Use o formato Cidade, UF (ex.: São Paulo, SP).\".\n4.2 A mensagem devem estar em Português do Brasil (PT-BR) e no formato JSON estruturado desta forma: {\"message\": \"{mensagem}\", \"ok\": false}.\n\n5. RESPOSTA DE ERRO - OUTROS ERROS DA API DE CLIMA:\n5.1 Se a ferramenta retornar qualquer outro erro técnico (ex: 401 Unauthorized, 429 Too Many Requests, 500 Server Error, 400 Nothing to geocode ou falha de conexão), formate a string final estritamente neste modelo: \"❌ Desculpe, não consegui consultar o clima agora devido a um problema técnico no servidor meteorológico.\".\n5.2 A mensagem devem estar em Português do Brasil (PT-BR) e no formato JSON estruturado desta forma: {\"message\": \"{mensagem}\", \"ok\": false}.\n\nIMPORTANTE: \nA) Retorne APENAS o objeto JSON puro e válido. NÃO envolva a resposta em blocos de código Markdown. NÃO use ```json ou ``` em hipótese alguma. Comece diretamente com a chave { e termine com a chave }.\n\nB) Não adicione conversas extras, saudações ou explicações fora do formato solicitado."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -928,
+        -112
+      ],
+      "id": "91f5c52a-f684-48e4-a0cd-8c64109d6316",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1392,
+        -336
+      ],
+      "id": "0e68bb2c-cf00-4c60-a4fc-8746e6fa87b9",
+      "name": "Telegram Trigger",
+      "webhookId": "b753b66d-90ed-401f-9d5f-7b5af95d72d7",
+      "credentials": {
+        "telegramApi": {
+          "id": "emcgHZMicdgQyoO4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "```\nWorkflow para buscar a temperatura atual de uma cidade do Brasil. O parâmetro exigido é o nome da cidade acompanhado do estado (ex: São Paulo, SP).\n```",
+        "height": 976,
+        "width": 2416,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        -432
+      ],
+      "id": "921b60ea-f1d8-4cb1-806e-10e6c54b442a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta para buscar a temperatura atual de uma cidade do Brasil. O parâmetro exigido é o nome da cidade acompanhado do estado (ex: São Paulo, SP)",
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $fromAI(\"latitude\") }}"
+            },
+            {
+              "name": "appid",
+              "value": "={{ $env[\"OPENWEATHER_API_KEY\"] }}"
+            },
+            {
+              "name": "units",
+              "value": "=metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $fromAI(\"longitude\") }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -704,
+        112
+      ],
+      "id": "5d433455-a5b7-4dad-872e-9d32d17d5fe5",
+      "name": "buscar_clima"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        112
+      ],
+      "id": "4566c493-3b1e-4948-b295-a92cd64eb13c",
+      "name": "Google Gemini Chat Model - principal",
+      "executeOnce": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OxmPvROS60SZvyRt",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json?.message || $json?.output?.message || $json?.output || $json?.error}}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        -64
+      ],
+      "id": "05fe16cc-6e59-4fda-b475-75d7e285a2cf",
+      "name": "Send a text message",
+      "webhookId": "4206d8f6-1c52-454e-8aec-6c683d092342",
+      "alwaysOutputData": false,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "telegramApi": {
+          "id": "emcgHZMicdgQyoO4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        112
+      ],
+      "id": "6f7ab744-7507-4a37-b3fe-ad04de3977e0",
+      "name": "Google Gemini Chat Model - fallback",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OxmPvROS60SZvyRt",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\n// Se não for possível converter uma saída em objeto\nif (!(item && Object.keys(item).length > 0)){\n  console.log(\"Não foi possível converter uma saída em objeto.\")\n  return [{\n    json: {\n        message: \"❌ Falha interna no processamento. Tente outra vez.\",\n        ok: false, \n        debug_completo: \"Não foi possível converter uma saída em objeto.\" // Para debugar\n    }\n    }];\n}\n\n// 1. Transforma TUDO que chegou do nó anterior em texto plano. \nconst erroCompleto = JSON.stringify(item);\n\n/* Nota: o código abaixo foi desabilitado porque se a IA retornar erro por cota excedida, o fluxo fará a pesquisa de forma determinística na OpenWeather.\n\n// 2. Procura pela mensagem de cota excedida dentro de todo o texto\nif (erroCompleto.toLowerCase().includes(\"too many requests\") || erroCompleto.includes(\"429\")) {\n    console.log(\"A cota de uso da Inteligência Artificial foi excedida.\")\n    return [{\n        json: {\n            message: \"❌ Muitas requisições enviadas.\\nContexto: A cota de uso da Inteligência Artificial foi excedida. O serviço retornará em breve.\",\n            ok: false\n        }\n    }];\n}\n*/\n\n// 3. Tenta identificar uma mensagem de erro mais curta caso seja outro problema\nlet erroCurto = \"Erro interno.\";\nif (item.error && typeof item.error.message === 'string') {\n    erroCurto = item.error.message;\n} else if (item.json && item.json.error && typeof item.json.error.message === 'string') {\n    erroCurto = item.json.error.message;\n} else if (item.json && typeof item.json.message === 'string') {\n    erroCurto = item.json.message;\n}\n\n// 4. Se for outro erro, devolve o erro curto (e guarda o erro completo no debug)\nconsole.log(erroCompleto)\n\nreturn [{\n    json: {\n        message: \"❌ Falha no processamento. Tente outra vez.\\nContexto: \" + erroCurto,\n        ok: false, \n        debug_completo: erroCompleto // Para debugar\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        16
+      ],
+      "id": "57074be9-3a5a-452c-a5e1-a929ae5d53d0",
+      "name": "Tratamento_erros"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5568be56-ccdc-4735-9c61-d998478ee0ad",
+              "name": "queue",
+              "value": "={{ $('Telegram Trigger').item.json.message.text.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim().replace(/\\s*,\\s*/g, ',').replace(/\\s+/g, ' ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        224
+      ],
+      "id": "09af926b-7498-4ba5-8cb1-3bb08d5a3735",
+      "name": "prepara_dados_entrada",
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.lat }}"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "appid",
+              "value": "={{ $env[\"OPENWEATHER_API_KEY\"] }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.lon }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        192,
+        208
+      ],
+      "id": "d2e16721-c1aa-4527-9373-ae9c8f09fa4c",
+      "name": "busca_clima_2",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://api.openweathermap.org/geo/1.0/direct",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }},br"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            },
+            {
+              "name": "appid",
+              "value": "={{ $env[\"OPENWEATHER_API_KEY\"] }}"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -272,
+        224
+      ],
+      "id": "606c0df0-d05c-4b2f-bbe3-55781a6c0950",
+      "name": "consulta_cidade",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4718eb26-7264-4bdf-85a2-80250362a7cc",
+              "name": "output",
+              "value": "={{ $json.output || $json.message }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        -224
+      ],
+      "id": "468ec6e5-7ac9-476a-b5f2-f9e3ebdf7e9b",
+      "name": "conversao_em_objeto",
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Captura a resposta JSON que veio da OpenWeather\nconst data = $input.first().json;\n\n// 1. Cenário de Erro: Cidade não encontrada (A API devolve cod: \"404\")\n\nif (data.cod === \"404\" || data.cod === 404 || data.error?.status === 404 || data.error?.status === \"404\" ||\n    data.cod === \"400\" || data.cod === 400 || data.error?.status === 400 || data.error?.status === \"400\" ) {\n    return [{\n        json: {\n            message: \"❌ Cidade não encontrada. Use o formato Cidade, UF (ex.: São Paulo, SP).\",\n            ok: false\n        }\n    }];\n}\n\n// 2. Cenário de Sucesso: A API retornou os dados climáticos\nif (data.main && data.main.temp) {\n  let nomeCidade = \"\";\n  try {\n    nomeCidade = $('consulta_cidade').first().json.name;\n    } catch (error) {\n        // Fallback: se errar o nome do nó, usa o que a API mandou mesmo\n        nomeCidade = data.name; \n    }\n    // Extrai a temperatura e arredonda para não mostrar casas decimais quebradas\n    const temperatura = Math.round(data.main.temp);\n\n    return [{\n        json: {\n            message: `🌤️ A temperatura em ${nomeCidade} é de ${temperatura}°C.`,\n            ok: true\n        }\n    }];\n}\n\n// 3. Fallback Genérico: Caso a API caia ou mude a estrutura inesperadamente\nreturn [{\n    json: {\n        message: \"❌ Ocorreu um erro inesperado ao consultar o clima. Tente novamente mais tarde.\",\n        ok: false\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        208
+      ],
+      "id": "a2ad4d76-437e-4a56-b315-0d0a56eb3490",
+      "name": "trata_erros_saidas"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e603977-73b5-4132-99c6-58efad98fe1c",
+              "name": "output",
+              "value": "={message: \"❌ Cidade não encontrada. Use o formato Cidade, UF (ex.: São Paulo, SP).\", ok: false}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        -80
+      ],
+      "id": "21121b20-1a39-4222-afd8-ede7cf9fa255",
+      "name": "cidade_nao_encontrada"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "42fa2532-506d-4f66-9f8c-4447cf13b920",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "ac3e8fba-9c5e-450a-950b-76b817850992",
+      "name": "nao_vazio1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "42fa2532-506d-4f66-9f8c-4447cf13b920",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        -288
+      ],
+      "id": "2ed71c29-ef0e-44f4-add3-7faddfdb0f31",
+      "name": "nao_vazio2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4d61341f-354c-4feb-bb9c-435fe633d15b",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "^.+,.+$",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1152,
+        -336
+      ],
+      "id": "fa02c40d-d2c5-4079-8894-acafc26ae1ec",
+      "name": "formato_uf_invalido"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "conversao_em_objeto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "prepara_dados_entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "formato_uf_invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_clima": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model - principal": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model - fallback": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Tratamento_erros": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepara_dados_entrada": {
+      "main": [
+        [
+          {
+            "node": "consulta_cidade",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "busca_clima_2": {
+      "main": [
+        [
+          {
+            "node": "trata_erros_saidas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "consulta_cidade": {
+      "main": [
+        [
+          {
+            "node": "nao_vazio1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "conversao_em_objeto": {
+      "main": [
+        [
+          {
+            "node": "nao_vazio2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tratamento_erros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trata_erros_saidas": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cidade_nao_encontrada": {
+      "main": [
+        [
+          {
+            "node": "conversao_em_objeto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "nao_vazio1": {
+      "main": [
+        [
+          {
+            "node": "busca_clima_2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "cidade_nao_encontrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "nao_vazio2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tratamento_erros",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formato_uf_invalido": {
+      "main": [
+        [
+          {
+            "node": "cidade_nao_encontrada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0575a3a4-7e33-474b-9742-f5ce44db3adb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b9f7a7d7e21ee02ac260c2efd15dc94aefb1b2c3d2c835d260bcce4559e5f88"
+  },
+  "id": "3KGrEHRBVQQl5KEZ",
+  "tags": []
+}
