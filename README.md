@@ -125,7 +125,7 @@ Este guia fornece o passo a passo para criar as contas e gerar as credenciais ne
 3. Após fazer o login, clique no seu nome de usuário no canto superior direito e selecione **My API Keys**.
 4. Você verá uma chave padrão (Default) já gerada. Se preferir, você pode dar um nome e gerar uma nova no campo "Create key".
 5. Copie a chave (uma sequência de letras e números) e cole-a no seu arquivo `.env` na variável `OPENWEATHER_API_KEY`.
-*(Atenção: A chave da OpenWeather pode levar de 1 a 2 horas para ser totalmente ativada pelos servidores deles após a criação recente de uma conta. Se o bot der erro logo nos primeiros testes, aguarde esse prazo).*
+*(Atenção: A chave da OpenWeather pode levar até 2 horas para ser totalmente ativada pelos servidores deles após a criação recente de uma conta. Se o bot der erro logo nos primeiros testes, aguarde esse prazo).*
 
 ### C. Criando conta no Ngrok e obtendo o Authtoken
 1. Acesse o site do Ngrok: [ngrok.com](https://ngrok.com/) e clique em **Sign up** para criar sua conta gratuita.
