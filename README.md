@@ -41,7 +41,7 @@ Para executar este projeto na sua máquina, você precisará ter instalado e con
 docker compose up -d
 
 ```
-6. Quando quiser desligar a infraestrutura de servidores, no terminal, dentro da pasta do projeto, execute o comando para desligá-la:
+6. Quando quiser desligar a infraestrutura de servidores, no terminal e dentro da pasta do projeto, execute o comando para desligá-la:
 ```bash
 docker compose down
 
@@ -56,7 +56,7 @@ Após os contêineres iniciarem com sucesso, siga os passos abaixo para ativar o
 2. Crie sua conta de administrador do N8N.
 3. No menu lateral direito, clique em **+** e depois em **Workflow**.
 4. No canto superior direito, clique no menu de três pontos (`...`) e selecione **Import from File**. Escolha o arquivo `workflow-telegram-chatbot.json`.
-5. Caso as credenciais não sejam preenchidas automaticamente após a importação do arquivo, abra os nós do **Telegram**, **Google Gemini** e **OpenWeather** e adicione as suas credenciais.
+5. Caso as credenciais não sejam preenchidas automaticamente após a importação do arquivo, siga os passos abaixo para adicionar as suas credenciais.
     1. No menu lateral direito, clique em **+** e depois em **Credential**.
     2. Procure pela credencial do **Google Gemini (PaLM) API** e clique em **Create**.
     3. No campo **API Key**, escolha a opção **Expression**, preencha o valor com `{{ $env["DEFAULT_GEMINI_API_KEY"] }}` e salve.
